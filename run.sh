@@ -11,8 +11,9 @@ function rebuild_c_modules() {
 	
 	# Next line generates string like 'lib.linux-x86_64-2.7', directory where libuinput.so was just generated
 	py_lib_str='from __future__ import print_function
-import platform 
-print("lib.linux-%s-%s.%s" % ((platform.machine(),) + platform.python_version_tuple()[0:2]))'
+import platform
+py_version = platform.python_version_tuple()
+print("lib.linux-{0}-{1}.{2}".format(platform.machine(), py_version[0], py_version[1]))'
 	LIB=$( python3 -c "$py_lib_str")
 	
 	for cmod in ${C_MODULES[@]}; do
@@ -41,12 +42,17 @@ cd "$(dirname "$0")"
 for cmod in ${C_MODULES[@]}; do
 	eval expected_version=\$C_VERSION_${cmod}
 	
-	py_mod_str="from __future__ import print_function
+	if [ ! -e "./lib$cmod.so" ] ; then
+        # if c module doesn't exist, make it
+        reported_version=-1
+	else
+        py_mod_str="from __future__ import print_function
 import os, ctypes
 lib=ctypes.CDLL('./lib${cmod}.so')
 print(lib.${cmod}_module_version())"
-
-	reported_version=$(PYTHONPATH="." python3 -c "$py_mod_str")
+        reported_version=$(PYTHONPATH="." python3 -c "$py_mod_str")
+    fi
+    
 	if [ x"$reported_version" != x"$expected_version" ] ; then
 		rebuild_c_modules ${cmod}
 	fi
