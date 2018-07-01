@@ -27,6 +27,7 @@ print("lib.linux-{0}-{1}.{2}".format(platform.machine(), py_version[0], py_versi
 	
 	for cmod in ${C_MODULES[@]}; do
 		if [ ! -e lib${cmod}.so ] ; then
+			ln -s lib${cmod}.cpython-36m-x86_64-linux-gnu.so build/$LIB/lib${cmod}.so || exit 1 # TODO don't know why the output name changed
 			ln -s build/$LIB/lib${cmod}.so ./lib${cmod}.so || exit 1
 			echo Symlinked ./lib${cmod}.so '->' build/$LIB/lib${cmod}.so
 		fi
