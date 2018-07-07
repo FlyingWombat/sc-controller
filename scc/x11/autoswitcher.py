@@ -89,7 +89,7 @@ class AutoSwitcher(object):
 		try:
 			self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 			self.socket.connect(get_daemon_socket())
-			self.socket.send(b"Register: autoswitch\n")
+			self.socket.send("Register: autoswitch\n")
 		except Exception:
 			log.error("Failed to connect to scc-daemon")
 			os._exit(1)
@@ -157,8 +157,8 @@ class AutoSwitcher(object):
 					try:
 						if self.config['autoswitch_osd']:
 							msg = (_("Switched to profile") + " " + profile_name)
-							self.socket.send(b"OSD: " + msg.encode('utf-8') + b"\n")
-						self.socket.send(b"Profile: " + path.encode('utf-8') + b"\n")
+							self.socket.send("OSD: " + msg.encode('utf-8') + "\n")
+						self.socket.send("Profile: " + path.encode('utf-8') + "\n")
 					except:
 						log.error("Socket write failed")
 						os._exit(2)
@@ -170,7 +170,7 @@ class AutoSwitcher(object):
 	def on_sa_turnoff(self, mapper, action):
 		with self.lock:
 			try:
-				self.socket.send(b"Turnoff.\n")
+				self.socket.send("Turnoff.\n")
 			except:
 				log.error("Socket write failed")
 				os._exit(2)
@@ -179,7 +179,7 @@ class AutoSwitcher(object):
 	def on_sa_restart(self, *a):
 		with self.lock:
 			try:
-				self.socket.send(b"Restart.\n")
+				self.socket.send("Restart.\n")
 			except:
 				log.error("Socket write failed")
 				os._exit(2)
@@ -328,7 +328,7 @@ class AutoswitchOptsMenuGenerator(MenuGenerator):
 				} for c in self.conds
 			]
 			cfg.save()
-			daemon.request(b"Reconfigure.\n", on_response, on_response)
+			daemon.request("Reconfigure.\n", on_response, on_response)
 		else:
 			on_response()
 	

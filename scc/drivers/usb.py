@@ -59,7 +59,7 @@ class USBDevice(object):
 	
 	def send_control(self, index, data):
 		""" Schedules writing control to device """
-		zeros = b'\x00' * (64 - len(data))
+		zeros = '\x00' * (64 - len(data))
 		
 		self._cmsg.insert(0, (
 			0x21,	# request_type

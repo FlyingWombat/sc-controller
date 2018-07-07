@@ -133,7 +133,7 @@ class Eudev(object):
 		"""
 		Returns new Monitor instance.
 		"""
-		monitor = self._lib.udev_monitor_new_from_netlink(self._ctx, b"udev")
+		monitor = self._lib.udev_monitor_new_from_netlink(self._ctx, "udev")
 		if monitor is None:
 			raise OSError("Failed to initialize monitor")
 		if subclass is not None:

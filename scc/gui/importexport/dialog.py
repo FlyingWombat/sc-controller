@@ -56,7 +56,7 @@ class Dialog(Editor, ComboSetter, Export, ImportVdf, ImportSccprofile):
 			# Definitelly not json
 			pass
 		
-		if f[0:2] == b"\x1f\x8b":
+		if f[0:2] == "\x1f\x8b":
 			# gzip, hopefully tar.gz
 			try:
 				tar = tarfile.open(filename, "r:gz")

@@ -29,7 +29,7 @@ class ProfileListMenuGenerator(MenuGenerator):
 		menu.hide()
 		def on_response(*a):
 			menu.quit(-2)
-		daemon.request(b"OSD: " + menuitem.label.encode("utf-8") + b"\n",
+		daemon.request("OSD: " + menuitem.label.encode("utf-8") + "\n",
 			on_response, on_response)
 	
 	
@@ -75,7 +75,7 @@ class RecentListMenuGenerator(MenuGenerator):
 		menu.hide()
 		def on_response(*a):
 			menu.quit(-2)
-		daemon.request(b"OSD: " + menuitem.label.encode("utf-8") + b"\n",
+		daemon.request("OSD: " + menuitem.label.encode("utf-8") + "\n",
 			on_response, on_response)
 	
 	

@@ -287,7 +287,7 @@ class SCCDaemon(Daemon):
 		Returns True on success.
 		"""
 		# Pre-format data
-		data = b"OSD: %s\n" % (shjoin(data) ,)
+		data = "OSD: %s\n" % (shjoin(data) ,)
 		
 		# Check if scc-osd-daemon is available
 		if not self.osd_daemon:
@@ -575,7 +575,7 @@ class SCCDaemon(Daemon):
 		with self.lock:
 			self.errors = [ (_id, error) for (_id, error) in self.errors if _id != id ]
 			if len(self.errors) == 0:
-				self._send_to_all(b"Ready.\n")
+				self._send_to_all("Ready.\n")
 	
 	
 	def send_controller_list(self, method):
@@ -694,13 +694,13 @@ class SCCDaemon(Daemon):
 		with self.lock:
 			client = Client(connection, self.default_mapper, rfile, wfile)
 			self.clients.add(client)
-			wfile.write(b"SCCDaemon\n")
+			wfile.write("SCCDaemon\n")
 			wfile.write(("Version: %s\n" % (DAEMON_VERSION,)).encode("utf-8"))
 			wfile.write(("PID: %s\n" % (os.getpid(),)).encode("utf-8"))
 			self.send_controller_list(wfile.write)
 			self.send_all_profiles(wfile.write)
 			if len(self.errors) == 0:
-				wfile.write(b"Ready.\n")
+				wfile.write("Ready.\n")
 			else:
 				for id, error in self.errors:
 					wfile.write(("Error: %s\n" % (error,)).encode("utf-8"))
@@ -736,24 +736,24 @@ class SCCDaemon(Daemon):
 					filename = message[8:].decode("utf-8").strip("\t ")
 					self._set_profile(client.mapper, filename)
 					log.info("Loaded profile '%s'", filename)
-					client.wfile.write(b"OK.\n")
+					client.wfile.write("OK.\n")
 				except Exception as e:
 					exc = traceback.format_exc()
 					log.exception(e)
 					tb = str(exc).encode("utf-8").encode('string_escape')
-					client.wfile.write(b"Fail: " + tb + b"\n")
+					client.wfile.write("Fail: " + tb + "\n")
 		elif message.startswith("OSD:"):
 			if not self.osd_daemon:
-				client.wfile.write(b"Fail: Cannot show OSD; there is no scc-osd-daemon registered\n")
+				client.wfile.write("Fail: Cannot show OSD; there is no scc-osd-daemon registered\n")
 			else:
 				try:
 					text = message[5:].decode("utf-8").strip("\t ")
 					with self.lock:
 						if not self._osd("message", text):
 							raise Exception()
-					client.wfile.write(b"OK.\n")
+					client.wfile.write("OK.\n")
 				except Exception:
-					client.wfile.write(b"Fail: cannot display OSD\n")
+					client.wfile.write("Fail: cannot display OSD\n")
 		elif message.startswith("Feedback:"):
 			try:
 				position, amplitude = message[9:].strip().split(" ", 2)
@@ -763,14 +763,14 @@ class SCCDaemon(Daemon):
 				)
 				if client.mapper.get_controller():
 					client.mapper.get_controller().feedback(data)
-				client.wfile.write(b"OK.\n")
+				client.wfile.write("OK.\n")
 			except Exception as e:
 				log.exception(e)
-				client.wfile.write(b"Fail: %s\n" % (e,))
+				client.wfile.write("Fail: %s\n" % (e,))
 		elif message.startswith("Controller."):
 			with self.lock:
 				client.mapper = self.default_mapper
-				client.wfile.write(b"OK.\n")
+				client.wfile.write("OK.\n")
 		elif message.startswith("Controller:"):
 			with self.lock:
 				try:
@@ -778,24 +778,24 @@ class SCCDaemon(Daemon):
 					for c in self.controllers:
 						if c.get_id() == controller_id:
 							client.mapper = c.get_mapper()
-							client.wfile.write(b"OK.\n")
+							client.wfile.write("OK.\n")
 							break
 					else:
 						raise Exception("goto fail")
 				except Exception as e:
-					client.wfile.write(b"Fail: no such controller\n")
+					client.wfile.write("Fail: no such controller\n")
 		elif message.startswith("State."):
 			if Config()["enable_sniffing"]:
-				client.wfile.write(b"State: %s\n" % (str(client.mapper.state), ))
+				client.wfile.write("State: %s\n" % (str(client.mapper.state), ))
 			else:
 				log.warning("Refused 'State' request: Sniffing disabled")
-				client.wfile.write(b"Fail: Sniffing disabled.\n")
+				client.wfile.write("Fail: Sniffing disabled.\n")
 		elif message.startswith("Led:"):
 			try:
 				number = int(message[4:])
 				number = clamp(0, number, 100)
 			except Exception as e:
-				client.wfile.write(b"Fail: %s\n" % (e,))
+				client.wfile.write("Fail: %s\n" % (e,))
 				return
 			if client.mapper.get_controller():
 				client.mapper.get_controller().set_led_level(number)
@@ -805,48 +805,48 @@ class SCCDaemon(Daemon):
 				with self.lock:
 					for l in to_observe:
 						client.observe_action(self, SCCDaemon.source_to_constant(l))
-					client.wfile.write(b"OK.\n")
+					client.wfile.write("OK.\n")
 			else:
 				log.warning("Refused 'Observe' request: Sniffing disabled")
-				client.wfile.write(b"Fail: Sniffing disabled.\n")
+				client.wfile.write("Fail: Sniffing disabled.\n")
 		elif message.startswith("Replace:"):
 			try:
 				l, actionstr = message.split(":", 1)[1].strip(" \t\r").split(" ", 1)
 				action = TalkingActionParser().restart(actionstr).parse().compress()
 			except Exception as e:
 				e = str(e).encode("utf-8").encode('string_escape')
-				client.wfile.write(b"Fail: failed to parse: " + e + "\n")
+				client.wfile.write("Fail: failed to parse: " + e + "\n")
 				return
 			with self.lock:
 				try:
 					if not self._can_lock_action(client.mapper, SCCDaemon.source_to_constant(l)):
-						client.wfile.write(b"Fail: Cannot lock " + l.encode("utf-8") + b"\n")
+						client.wfile.write("Fail: Cannot lock " + l.encode("utf-8") + "\n")
 						return
 				except ValueError as e:
 					tb = str(traceback.format_exc()).encode("utf-8").encode('string_escape')
-					client.wfile.write(b"Fail: " + tb + b"\n")
+					client.wfile.write("Fail: " + tb + "\n")
 					return
 				client.replace_action(self, SCCDaemon.source_to_constant(l), action)
-				client.wfile.write(b"OK.\n")
+				client.wfile.write("OK.\n")
 		elif message.startswith("Lock:"):
 			to_lock = [ x for x in message.split(":", 1)[1].strip(" \t\r").split(" ") ]
 			with self.lock:
 				try:
 					for l in to_lock:
 						if not self._can_lock_action(client.mapper, SCCDaemon.source_to_constant(l)):
-							client.wfile.write(b"Fail: Cannot lock " + l.encode("utf-8") + b"\n")
+							client.wfile.write("Fail: Cannot lock " + l.encode("utf-8") + "\n")
 							return
 				except ValueError as e:
 					tb = str(traceback.format_exc()).encode("utf-8").encode('string_escape')
-					client.wfile.write(b"Fail: " + tb + b"\n")
+					client.wfile.write("Fail: " + tb + "\n")
 					return
 				for l in to_lock:
 					client.lock_action(self, SCCDaemon.source_to_constant(l))
-				client.wfile.write(b"OK.\n")
+				client.wfile.write("OK.\n")
 		elif message.startswith("Unlock."):
 			with self.lock:
 				client.unlock_actions(self)
-				client.wfile.write(b"OK.\n")
+				client.wfile.write("OK.\n")
 		elif message.startswith("Reconfigure."):
 			with self.lock:
 				# Load config
@@ -864,7 +864,7 @@ class SCCDaemon(Daemon):
 					self.autoswitch_daemon = None
 				# Respond
 				try:
-					client.wfile.write(b"OK.\n")
+					client.wfile.write("OK.\n")
 					self._send_to_all("Reconfigured.\n".encode("utf-8"))
 				except:
 					pass
@@ -874,7 +874,7 @@ class SCCDaemon(Daemon):
 				cbs += self.rescan_cbs
 				# Respond first
 				try:
-					client.wfile.write(b"OK.\n")
+					client.wfile.write("OK.\n")
 				except:
 					pass
 			# Do stuff later
@@ -898,25 +898,25 @@ class SCCDaemon(Daemon):
 				else:
 					for c in self.controllers:
 						c.turnoff()
-				client.wfile.write(b"OK.\n")
+				client.wfile.write("OK.\n")
 		elif message.startswith("Gesture:"):
 			try:
 				what, up_angle = message[8:].strip().split(" ", 2)
 				up_angle = int(up_angle)
 			except Exception as e:
 				tb = str(traceback.format_exc()).encode("utf-8").encode('string_escape')
-				client.wfile.write(b"Fail: " + tb + b"\n")
+				client.wfile.write("Fail: " + tb + "\n")
 				return
 			with self.lock:
 				client.request_gesture(self, what, up_angle)
-				client.wfile.write(b"OK.\n")
+				client.wfile.write("OK.\n")
 		elif message.startswith("Restart."):
 			self.on_sa_restart()
 		elif message.startswith("Gestured:"):
 			gstr = message[9:].strip()
 			client.gesture_action.gesture(client.mapper, gstr)
 			with self.lock:
-				client.wfile.write(b"OK.\n")
+				client.wfile.write("OK.\n")
 		elif message.startswith("Selected:"):
 			menuaction = None
 			def press(mapper):
@@ -946,10 +946,10 @@ class SCCDaemon(Daemon):
 						menuaction = menudata.get_by_id(item_id).action
 					else:
 						menuaction = client.mapper.profile.menus[menu_id].get_by_id(item_id).action
-					client.wfile.write(b"OK.\n")
+					client.wfile.write("OK.\n")
 				except:
 					log.warning("Selected menu item is no longer valid.")
-					client.wfile.write(b"Fail: Selected menu item is no longer valid\n")
+					client.wfile.write("Fail: Selected menu item is no longer valid\n")
 				if menuaction:
 					client.mapper.schedule(0, press)
 		elif message.startswith("Register:"):
@@ -962,9 +962,9 @@ class SCCDaemon(Daemon):
 					if self.autoswitch_daemon: self.autoswitch_daemon.close()
 					self.autoswitch_daemon = client
 					log.info("Registered scc-autoswitch-daemon")
-				client.wfile.write(b"OK.\n")
+				client.wfile.write("OK.\n")
 		else:
-			client.wfile.write(b"Fail: Unknown command\n")
+			client.wfile.write("Fail: Unknown command\n")
 	
 	
 	def _remove_subproccess(self, binary_name):
@@ -1112,7 +1112,7 @@ class Client(object):
 		def cb(gesture):
 			# Called while lock is being held
 			try:
-				self.wfile.write(b"Gesture: %s %s\n" % (what, gesture))
+				self.wfile.write("Gesture: %s %s\n" % (what, gesture))
 			except:
 				pass
 		
