@@ -7,6 +7,8 @@ Most "interesting" thing here may be that this works 100% independently from
 daemon.
 """
 from __future__ import unicode_literals
+from __future__ import division
+from past.utils import old_div
 from scc.tools import _
 
 from gi.repository import Gtk, GLib, GdkPixbuf
@@ -125,7 +127,7 @@ class ControllerRegistration(Editor):
 		# Search in database
 		try:
 			db = open(os.path.join(get_share_path(), "gamecontrollerdb.txt"), "r")
-		except Exception, e:
+		except Exception as e:
 			log.error('Failed to load gamecontrollerdb')
 			log.exception(e)
 			return False
@@ -210,13 +212,13 @@ class ControllerRegistration(Editor):
 	def generate_unassigned(self):
 		unassigned = set()
 		unassigned.clear()
-		assigned_axes = set([ x for x in self._mappings.values()
+		assigned_axes = set([ x for x in list(self._mappings.values())
 							if isinstance(x, AxisData) ])
-		assigned_axes.update([ x.axis_data for x in self._mappings.values()
+		assigned_axes.update([ x.axis_data for x in list(self._mappings.values())
 							if isinstance(x, DPadEmuData) ])
-		assigned_buttons = set([ x for x in self._mappings.values()
-							if x in SCButtons.__members__.values() ])
-		assigned_buttons.update([ x.button for x in self._mappings.values()
+		assigned_buttons = set([ x for x in list(self._mappings.values())
+							if x in list(SCButtons.__members__.values()) ])
+		assigned_buttons.update([ x.button for x in list(self._mappings.values())
 							if isinstance(x, DPadEmuData) ])
 		for a in BUTTON_ORDER:
 			if a not in assigned_buttons:
@@ -270,7 +272,7 @@ class ControllerRegistration(Editor):
 			if target_axis not in ("ltrig", "rtrig"):
 				# Deadzone is generated with assumption that all sticks are left
 				# in center position before 'Save' is pressed.
-				center = axisdata.min + (axisdata.max - axisdata.min) / 2
+				center = axisdata.min + old_div((axisdata.max - axisdata.min), 2)
 				deadzone = abs(axisdata.pos - center) * 2 + 2
 				if abs(axisdata.max) < 2:
 					# DPADs
@@ -279,7 +281,7 @@ class ControllerRegistration(Editor):
 			
 			return rv
 		
-		for code, target in self._mappings.iteritems():
+		for code, target in self._mappings.items():
 			if target in SCButtons:
 				config['buttons'][code] = nameof(target)
 			elif isinstance(target, DPadEmuData):
@@ -347,7 +349,7 @@ class ControllerRegistration(Editor):
 		try:
 			json.loads(jsondata)
 			btNext.set_sensitive(True)
-		except Exception, e:
+		except Exception as e:
 			# User can modify generated json code before hitting save,
 			# but if he writes something unparsable, save button is disabled
 			btNext.set_sensitive(False)

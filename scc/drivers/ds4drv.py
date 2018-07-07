@@ -4,7 +4,10 @@ SC Controller - Dualshock 4 Driver
 
 Extends HID driver with DS4-specific options.
 """
+from __future__ import division
 
+from builtins import range
+from past.utils import old_div
 from scc.drivers.hiddrv import BUTTON_COUNT, ButtonData, AxisType, AxisData
 from scc.drivers.hiddrv import HIDController, HIDDecoder, hiddrv_test
 from scc.drivers.hiddrv import AxisMode, AxisDataUnion, AxisModeData
@@ -115,10 +118,10 @@ class DS4Controller(HIDController):
 		)
 		
 		if test_mode:
-			for x in xrange(BUTTON_COUNT):
+			for x in range(BUTTON_COUNT):
 				self._decoder.buttons.button_map[x] = x
 		else:
-			for x in xrange(BUTTON_COUNT):
+			for x in range(BUTTON_COUNT):
 				self._decoder.buttons.button_map[x] = 64
 			for x, sc in enumerate(DS4Controller.BUTTON_MAP):
 				self._decoder.buttons.button_map[x] = self.button_to_bit(sc)
@@ -171,8 +174,8 @@ class DS4Controller(HIDController):
 
 
 class DS4EvdevController(EvdevController):
-	TOUCH_FACTOR_X = STICK_PAD_MAX / 940.0
-	TOUCH_FACTOR_Y = STICK_PAD_MAX / 470.0
+	TOUCH_FACTOR_X = old_div(STICK_PAD_MAX, 940.0)
+	TOUCH_FACTOR_Y = old_div(STICK_PAD_MAX, 470.0)
 	BUTTON_MAP = {
 		304: "A",
 		305: "B",

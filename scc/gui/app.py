@@ -5,6 +5,14 @@ SC-Controller - App
 Main application window
 """
 from __future__ import unicode_literals
+from __future__ import division
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
+from past.utils import old_div
 from scc.tools import _, set_logging_level
 
 from gi.repository import Gtk, Gdk, Gio, GLib
@@ -30,7 +38,7 @@ from scc.profile import Profile
 from scc.config import Config
 
 import scc.osd.menu_generators
-import os, sys, platform, re, json, urllib, logging
+import os, sys, platform, re, json, urllib.request, urllib.parse, urllib.error, logging
 log = logging.getLogger("App")
 
 class App(Gtk.Application, UserDataManager, BindingEditor):
@@ -365,7 +373,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 	def hint(self, button):
 		""" As hilight, but marks GTK Button as well """
 		active = None
-		for b in self.button_widgets.values():
+		for b in list(self.button_widgets.values()):
 			if b.widget.get_sensitive():
 				b.widget.set_state(Gtk.StateType.NORMAL)
 				if b.name == button:
@@ -577,7 +585,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 		self.builder.get_object("txProfileFilename").set_text(giofile.get_path())
 		self.builder.get_object("txProfileDescription").get_buffer().set_text(self.current.description)
 		self.builder.get_object("cbProfileIsTemplate").set_active(self.current.is_template)
-		for b in self.button_widgets.values():
+		for b in list(self.button_widgets.values()):
 			b.update()
 		self.recursing = False
 	
@@ -779,7 +787,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 		y = main_area.get_allocation().height - 5
 		w = self.builder.get_object("vbC")
 		allocation = w.get_allocation()
-		x = (self.background.get_allocation().width - allocation.width) / 2
+		x = old_div((self.background.get_allocation().width - allocation.width), 2)
 		y -= allocation.height
 		if w.get_parent():
 			main_area.move(w, x, y)
@@ -856,7 +864,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 				self.remove_switcher(s)
 		
 		# Assign controllers to widgets
-		for i in xrange(0, count):
+		for i in range(0, count):
 			c = self.dm.get_controllers()[i]
 			self.profile_switchers[i].set_controller(c)
 		
@@ -1092,11 +1100,11 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 				else:
 					self.hilights[App.OBSERVE_COLOR].remove(what)
 				self._update_background()
-			except KeyError, e:
+			except KeyError as e:
 				# Non fatal
 				pass
 		else:
-			print "event", what
+			print("event", what)
 	
 	
 	def on_profile_right_clicked(self, ps):
@@ -1184,7 +1192,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 				except:
 					# non-existing .mod file is expected
 					pass
-		except Exception, e:
+		except Exception as e:
 			log.error("Failed to rename %s: %s", old_fname, e)
 		
 		controllers = list(self.dm.get_controllers())
@@ -1226,7 +1234,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 					pass
 				for ps in self.profile_switchers:
 					ps.refresh_profile_path(name)
-			except Exception, e:
+			except Exception as e:
 				log.error("Failed to remove %s: %s", fname, e)
 		d.destroy()
 	
@@ -1483,7 +1491,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 					stream.read_bytes_async(102400, 0, None, stream_ready, buffer)
 				else:
 					self.on_got_release_notes(buffer.decode("utf-8"))
-			except Exception, e:
+			except Exception as e:
 				log.warning("Failed to read release notes")
 				log.exception(e)
 				return
@@ -1493,7 +1501,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 				stream = f.read_finish(task)
 				assert stream
 				stream.read_bytes_async(102400, 0, None, stream_ready, buffer)
-			except Exception, e:
+			except Exception as e:
 				log.warning("Failed to read release notes")
 				log.exception(e)
 				log.warning("(above error is not fatal and can be ignored)")
@@ -1573,7 +1581,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 						.replace("https://github.com/", "https://raw.githubusercontent.com/")
 						.replace("/blob/", "/")
 					)
-				name = urllib.unquote(".".join(uri.split("/")[-1].split(".")[0:-1]))
+				name = urllib.parse.unquote(".".join(uri.split("/")[-1].split(".")[0:-1]))
 				remote = Gio.File.new_for_uri(uri)
 				tmp, stream = Gio.File.new_tmp("%s.XXXXXX" % (name,))
 				stream.close()

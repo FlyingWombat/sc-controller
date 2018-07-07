@@ -5,6 +5,10 @@ SC-Controller - Action Editor - Axis Component
 Assigns emulated axis to trigger
 """
 from __future__ import unicode_literals
+from __future__ import division
+from builtins import range
+from builtins import object
+from past.utils import old_div
 from scc.tools import _
 
 from gi.repository import Gdk, GdkX11, GLib
@@ -379,7 +383,7 @@ class AxisActionComponent(AEComponent, TimerManager):
 				# Key ends with "1". Same thing as above but for Y coordinate
 				y1, y2 = -y1, -y2
 		if "size" in key:
-			x1, y1, x2, y2 = x1 / 100.0, y1 / 100.0, x2 / 100.0, y2 / 100.0
+			x1, y1, x2, y2 = old_div(x1, 100.0), old_div(y1, 100.0), old_div(x2, 100.0), old_div(y2, 100.0)
 		# ... class 
 		if "window-" in key:
 			cls = WinAreaAction
@@ -525,7 +529,7 @@ class FakeMapper(object):
 				root, "_NET_CLIENT_LIST_STACKING", max_size=0x8000)
 		
 		if nitems > 0:
-			for i in reversed(xrange(0, nitems)):
+			for i in reversed(range(0, nitems)):
 				window = cast(prop, POINTER(X.XID))[i]
 				if window in my_windows:
 					# skip over my own windows

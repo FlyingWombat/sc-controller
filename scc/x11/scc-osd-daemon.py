@@ -6,6 +6,7 @@ SC-Controller - OSD Daemon
 Controls stuff displayed as OSD.
 """
 from __future__ import unicode_literals
+from builtins import object
 from scc.tools import _, set_logging_level
 
 import gi

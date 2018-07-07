@@ -5,6 +5,9 @@ SC-Controller - Action Editor
 Allows to edit button or trigger action.
 """
 from __future__ import unicode_literals
+from __future__ import division
+from builtins import str
+from past.utils import old_div
 from scc.tools import _
 
 from scc.gui.controller_widget import ControllerButton
@@ -70,7 +73,7 @@ class MacroEditor(Editor):
 			action = NoAction()
 		elif cbMacroType.get_active() == 2:
 			# Cycle
-			pars = filter(lambda a : not isinstance(a, SleepAction), pars)
+			pars = [a for a in pars if not isinstance(a, SleepAction)]
 			action = Cycle(*pars)
 		elif cbMacroType.get_active() == 1:
 			# Repeating macro
@@ -255,11 +258,11 @@ class MacroEditor(Editor):
 		ms = int(value)
 		action = action_data.action
 		label = action_data.label
-		action.delay = value / 1000.0
+		action.delay = old_div(value, 1000.0)
 		if ms < 1000:
 			label.set_markup(_("<b>Delay: %sms</b>") % (ms,))
 		else:
-			s = ms / 1000.0
+			s = old_div(ms, 1000.0)
 			label.set_markup(_("<b>Delay: %0.2fs</b>") % (s,))
 		self.update_action_field()
 	

@@ -2,6 +2,8 @@
 """
 Imports VDF profile and converts it to Profile object.
 """
+from __future__ import division
+from past.utils import old_div
 from scc.uinput import Keys, Axes, Rels
 from scc.actions import Action, NoAction, ButtonAction, DPadAction, XYAction
 from scc.actions import HatRightAction, TriggerAction, MouseAction
@@ -168,7 +170,7 @@ class VDFProfile(Profile):
 			settings = group["settings"]
 			sens = 1.0, 1.0, 1.0
 			if "sensitivity" in settings:
-				s = float(settings["sensitivity"]) / 100.0
+				s = old_div(float(settings["sensitivity"]), 100.0)
 				sens = s, s, s
 			if "haptic_intensity" in settings:
 				action = FeedbackModifier(
@@ -401,8 +403,8 @@ class VDFProfile(Profile):
 			w = w * scale / 100.0
 			h = h * scale / 100.0
 			# Convert to (0, 1) range
-			x, y = x / 100.0, 1.0 - (y / 100.0)
-			w, h = w / 100.0, h / 100.0
+			x, y = old_div(x, 100.0), 1.0 - (old_div(y, 100.0))
+			w, h = old_div(w, 100.0), old_div(h, 100.0)
 			# Convert to rectangle
 			x1 = max(0.0, x - (w * VDFProfile.REGION_IMPORT_FACTOR))
 			x2 = min(1.0, x + (w * VDFProfile.REGION_IMPORT_FACTOR))
@@ -599,7 +601,7 @@ class VDFProfile(Profile):
 				self.action_sets[aset.name] = aset
 				VDFProfile._load_preset(data, aset, p)
 		
-		for aset in self.action_sets.values():
+		for aset in list(self.action_sets.values()):
 			aset.buttons[SCButtons.C] = HoldModifier(
 				MenuAction("Default.menu"), MenuAction("Default.menu")
 			)

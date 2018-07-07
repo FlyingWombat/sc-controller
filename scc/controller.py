@@ -1,4 +1,7 @@
 #!/usr/bin/env python2
+from __future__ import division
+from past.utils import old_div
+from builtins import object
 from scc.constants import HapticPos
 import logging
 
@@ -147,7 +150,7 @@ class HapticData(object):
 		return self.data[1]
 	
 	def get_frequency(self):
-		return float(self.frequency) / 1000.0
+		return old_div(float(self.frequency), 1000.0)
 	
 	def get_period(self):
 		return self.data[2]

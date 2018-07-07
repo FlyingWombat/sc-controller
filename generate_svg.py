@@ -1,4 +1,7 @@
 #!/usr/bin/env python2
+from __future__ import division
+from past.utils import old_div
+from builtins import object
 from scc.tools import _
 
 from scc.actions import Action, DPadAction, XYAction, MouseAction
@@ -153,14 +156,14 @@ class Box(object):
 		elif (self.align & Align.BOTTOM) != 0:
 			self.y = gen.full_height - self.height - anchor_y
 		else:
-			self.y = (gen.full_height - self.height) / 2
+			self.y = old_div((gen.full_height - self.height), 2)
 		
 		if (self.align & Align.LEFT) != 0:
 			self.x = anchor_x
 		elif (self.align & Align.RIGHT) != 0:
 			self.x = gen.full_width - self.width - anchor_x
 		else:
-			self.x = (gen.full_width - self.width) / 2
+			self.x = old_div((gen.full_width - self.width), 2)
 	
 	
 	def place(self, gen, root):

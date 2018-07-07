@@ -3,6 +3,9 @@
 SC-Controller - Gesture-related GUI stuff.
 """
 from __future__ import unicode_literals
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 from scc.tools import _, set_logging_level
 
 from gi.repository import Gtk, Gdk, GLib, GObject
@@ -40,7 +43,7 @@ class GestureDraw(Gtk.DrawingArea):
 	
 	
 	def add(self, x, y):
-		factor = self._size / float(STICK_PAD_MAX - STICK_PAD_MIN)
+		factor = old_div(self._size, float(STICK_PAD_MAX - STICK_PAD_MIN))
 		x -= STICK_PAD_MIN
 		y = STICK_PAD_MAX - y
 		self._points.append(( x * factor, y * factor ))
@@ -59,7 +62,7 @@ class GestureDraw(Gtk.DrawingArea):
 		# Hilighted boxes
 		# Iterates over gesture in progress hilighting apripriate boxes,
 		# so user can see what's he doing.
-		box_width = float(self._size) / float(resolution)
+		box_width = old_div(float(self._size), float(resolution))
 		col = self.colors['hilight']
 		alpha = col.alpha
 		alpha_fallout = alpha * 0.5 / self.MAX_STEPS
@@ -76,7 +79,7 @@ class GestureDraw(Gtk.DrawingArea):
 		
 		# Grid
 		Gdk.cairo_set_source_rgba(cr, self.colors['grid'])
-		for i in xrange(1, resolution):
+		for i in range(1, resolution):
 			cr.move_to(i * box_width, self.GRID_PAD)
 			cr.line_to(i * box_width, self._size - self.GRID_PAD)
 			cr.stroke()

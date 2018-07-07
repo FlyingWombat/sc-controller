@@ -7,7 +7,11 @@ way how resulting action works.
 For example, click() modifier executes action only if pad is pressed.
 """
 from __future__ import unicode_literals
+from __future__ import division
 
+from builtins import str
+from builtins import range
+from past.utils import old_div
 from scc.actions import Action, MouseAction, XYAction, AxisAction, RangeOP
 from scc.actions import NoAction, WholeHapticAction, HapticEnabledAction
 from scc.constants import STICK_PAD_MIN, STICK_PAD_MAX, STICK_PAD_MAX_HALF
@@ -405,11 +409,11 @@ class BallModifier(Modifier, WholeHapticAction):
 		self._yvel = 0.0
 		self._ampli  = ampli
 		self._degree = degree
-		self._radscale = (degree * PI / 180) / ampli
+		self._radscale = old_div((degree * PI / 180), ampli)
 		self._mass = mass
 		self._roll_task = None
 		self._r = r
-		self._I = (2 * self._mass * self._r**2) / 5.0
+		self._I = old_div((2 * self._mass * self._r**2), 5.0)
 		self._a = self._r * self.friction / self._I
 		self._xvel_dq = deque(maxlen=mean_len)
 		self._yvel_dq = deque(maxlen=mean_len)
@@ -443,8 +447,8 @@ class BallModifier(Modifier, WholeHapticAction):
 	def _add(self, dx, dy):
 		# Compute instant velocity
 		try:
-			self._xvel = sum(self._xvel_dq) / len(self._xvel_dq)
-			self._yvel = sum(self._yvel_dq) / len(self._yvel_dq)
+			self._xvel = old_div(sum(self._xvel_dq), len(self._xvel_dq))
+			self._yvel = old_div(sum(self._yvel_dq), len(self._yvel_dq))
 		except ZeroDivisionError:
 			self._xvel = 0.0
 			self._yvel = 0.0
@@ -464,8 +468,8 @@ class BallModifier(Modifier, WholeHapticAction):
 		
 		_hyp = sqrt((self._xvel**2) + (self._yvel**2))
 		if _hyp != 0.0:
-			_ax = self._a * (abs(self._xvel) / _hyp)
-			_ay = self._a * (abs(self._yvel) / _hyp)
+			_ax = self._a * (old_div(abs(self._xvel), _hyp))
+			_ay = self._a * (old_div(abs(self._yvel), _hyp))
 		else:
 			_ax = self._a
 			_ay = self._a
@@ -479,8 +483,8 @@ class BallModifier(Modifier, WholeHapticAction):
 		_yvel = self._yvel - copysign(_dvy, self._yvel)
 		
 		# compute displacement
-		dx = (((_xvel + self._xvel) / 2) * dt) / self._radscale
-		dy = (((_yvel + self._yvel) / 2) * dt) / self._radscale
+		dx = old_div(((old_div((_xvel + self._xvel), 2)) * dt), self._radscale)
+		dy = old_div(((old_div((_yvel + self._yvel), 2)) * dt), self._radscale)
 		
 		self._xvel = _xvel
 		self._yvel = _yvel
@@ -565,7 +569,7 @@ class BallModifier(Modifier, WholeHapticAction):
 				if dt < 0.0075: return
 				self._lastTime = t
 				dx, dy = x - self._old_pos[0], self._old_pos[1] - y
-				self._add(dx / dt, dy / dt)
+				self._add(old_div(dx, dt), old_div(dy, dt))
 				self.action.add(mapper, dx * self.speed[0], dy * self.speed[1])
 			else:
 				self._stop()
@@ -609,7 +613,7 @@ class DeadzoneModifier(Modifier):
 	
 	def _mod_init(self, *params):
 		if len(params) < 1: raise TypeError("Not enough parameters")
-		if type(params[0]) in (str, unicode):
+		if type(params[0]) in (str, str):
 			self.mode = params[0]
 			if hasattr(self, "mode_" + self.mode):
 				self._convert = getattr(self, "mode_" + self.mode)
@@ -669,7 +673,7 @@ class DeadzoneModifier(Modifier):
 			return copysign(
 				clamp(
 					0,
-					((x - self.lower) / (self.upper - self.lower)) * range,
+					(old_div((x - self.lower), (self.upper - self.lower))) * range,
 					range),
 				x
 			), 0
@@ -817,7 +821,7 @@ class ModeModifier(Modifier):
 	
 	def make_checks(self):
 		self.checks = []
-		for button, action in self.mods.items():
+		for button, action in list(self.mods.items()):
 			if isinstance(button, RangeOP):
 				self.checks.append(( button, action ))
 			else:
@@ -826,9 +830,9 @@ class ModeModifier(Modifier):
 	
 	def get_child_actions(self):
 		if self.default is None:
-			return self.mods.values()
+			return list(self.mods.values())
 		else:
-			return [ self.default ] + self.mods.values()
+			return [ self.default ] + list(self.mods.values())
 	
 	
 	@staticmethod
@@ -847,7 +851,7 @@ class ModeModifier(Modifier):
 	
 	def get_compatible_modifiers(self):
 		rv = 0
-		for action in self.mods.values():
+		for action in list(self.mods.values()):
 			rv |= action.get_compatible_modifiers()
 		if self.default:
 			rv |= self.default.get_compatible_modifiers()
@@ -859,7 +863,7 @@ class ModeModifier(Modifier):
 		if self.default:
 			return self.default.strip()
 		if len(self.mods):
-			return self.mods.values()[0].strip()
+			return list(self.mods.values())[0].strip()
 		# Empty ModeModifier
 		return NoAction()
 	
@@ -899,7 +903,7 @@ class ModeModifier(Modifier):
 			for check in self.mods:
 				a_str = NameModifier.unstrip(self.mods[check]).to_string(True).split("\n")
 				a_str[0] = (" " * pad) + "  " + (nameof(check) + ",").ljust(11) + a_str[0]	# Key has to be one of SCButtons
-				for i in xrange(1, len(a_str)):
+				for i in range(1, len(a_str)):
 					a_str[i] = (" " * pad) + "  " + a_str[i]
 				a_str[-1] = a_str[-1] + ","
 				rv += a_str
@@ -923,7 +927,7 @@ class ModeModifier(Modifier):
 	
 	
 	def cancel(self, mapper):
-		for action in self.mods.values():
+		for action in list(self.mods.values()):
 			action.cancel(mapper)
 		self.default.cancel(mapper)
 	
@@ -1409,7 +1413,7 @@ class SmoothModifier(Modifier):
 		self.filter = filter
 		self._deq_x = deque([ 0.0 ] * level, maxlen=level)
 		self._deq_y = deque([ 0.0 ] * level, maxlen=level)
-		self._range = list(xrange(level))
+		self._range = list(range(level))
 		self._weights = [ multiplier ** x for x in reversed(self._range) ]
 		self._w_sum = sum(self._weights)
 		self._last_pos = None
@@ -1435,7 +1439,7 @@ class SmoothModifier(Modifier):
 		""" Computes average x,y from all accumulated positions """
 		x = sum(( self._deq_x[i] * self._weights[i] for i in self._range ))
 		y = sum(( self._deq_y[i] * self._weights[i] for i in self._range ))
-		return x / self._w_sum, y / self._w_sum
+		return old_div(x, self._w_sum), old_div(y, self._w_sum)
 	
 	
 	def whole(self, mapper, x, y, what):
@@ -1614,7 +1618,7 @@ class CircularAbsModifier(Modifier, WholeHapticAction):
 			self.angle = None
 		else:
 			# Compute current angle
-			angle = atan2(x, y) + PI / 4
+			angle = atan2(x, y) + old_div(PI, 4)
 			# Compute movement
 			if self.haptic:
 				if self.angle is not None:
@@ -1631,7 +1635,7 @@ class CircularAbsModifier(Modifier, WholeHapticAction):
 						WholeHapticAction.change(self, mapper, diff * 10000, 0, what)
 				self.angle = angle
 			# Apply actual constant
-			angle *= STICK_PAD_MAX / PI
+			angle *= old_div(STICK_PAD_MAX, PI)
 			# Set axis on child action
 			self.action.axis(mapper, angle * self.speed, 0)
 			mapper.force_event.add(FE_PAD)

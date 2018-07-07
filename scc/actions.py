@@ -7,6 +7,12 @@ stick, pad or trigger is generated - typicaly what emulated button, stick or
 trigger should be pressed.
 """
 from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from builtins import str
+from builtins import range
+from past.utils import old_div
+from builtins import object
 from scc.tools import _
 
 from scc.tools import ensure_size, quat2euler, anglediff
@@ -382,7 +388,7 @@ class Action(object):
 		""" Encodes one parameter. Used by encode_parameters """
 		if parameter in PARSER_CONSTANTS:
 			return parameter
-		if type(parameter) in (str, unicode):
+		if type(parameter) in (str, str):
 			return "'%s'" % (str(parameter).encode('string_escape'),)
 		return nameof(parameter)
 	
@@ -455,37 +461,37 @@ class RangeOP(object):
 	def cmp_gt(self, mapper):
 		if mapper.state is None:
 			return False
-		state = float(getattr(mapper.state, self.axis_name)) / self.max
+		state = old_div(float(getattr(mapper.state, self.axis_name)), self.max)
 		return state > self.value
 	
 	def cmp_lt(self, mapper):
 		if mapper.state is None:
 			return False
-		state = float(getattr(mapper.state, self.axis_name)) / self.max
+		state = old_div(float(getattr(mapper.state, self.axis_name)), self.max)
 		return state < self.value
 	
 	def cmp_ge(self, mapper):
 		if mapper.state is None:
 			return False
-		state = float(getattr(mapper.state, self.axis_name)) / self.max
+		state = old_div(float(getattr(mapper.state, self.axis_name)), self.max)
 		return state >= self.value
 	
 	def cmp_le(self, mapper):
 		if mapper.state is None:
 			return False
-		state = float(getattr(mapper.state, self.axis_name)) / self.max
+		state = old_div(float(getattr(mapper.state, self.axis_name)), self.max)
 		return state <= self.value
 	
 	def cmp_labs(self, mapper):
 		if mapper.state is None:
 			return False
-		state = float(getattr(mapper.state, self.axis_name)) / self.max
+		state = old_div(float(getattr(mapper.state, self.axis_name)), self.max)
 		return abs(state) < self.value
 	
 	def cmp_gabs(self, mapper):
 		if mapper.state is None:
 			return False
-		state = float(getattr(mapper.state, self.axis_name)) / self.max
+		state = old_div(float(getattr(mapper.state, self.axis_name)), self.max)
 		return abs(state) > self.value
 	
 	def __call__(self, mapper):
@@ -684,7 +690,7 @@ class AxisAction(Action):
 	
 	
 	def axis(self, mapper, position, what):
-		p = float(position * self.speed - STICK_PAD_MIN) / (STICK_PAD_MAX - STICK_PAD_MIN)
+		p = old_div(float(position * self.speed - STICK_PAD_MIN), (STICK_PAD_MAX - STICK_PAD_MIN))
 		p = int((p * (self.max - self.min)) + self.min)
 		p = AxisAction.clamp_axis(self.id, p)
 		AxisAction.old_positions[self.id] = p
@@ -706,7 +712,7 @@ class AxisAction(Action):
 	
 	
 	def trigger(self, mapper, position, old_position):
-		p = float(position * self.speed - TRIGGER_MIN) / (TRIGGER_MAX - TRIGGER_MIN)
+		p = old_div(float(position * self.speed - TRIGGER_MIN), (TRIGGER_MAX - TRIGGER_MIN))
 		p = int((p * (self.max - self.min)) + self.min)
 		p = AxisAction.clamp_axis(self.id, p)
 		AxisAction.old_positions[self.id] = p
@@ -1092,8 +1098,8 @@ class AreaAction(Action, SpecialAction, OSDEnabledAction):
 			# Compute coordinates specified from other side of screen if needed
 			x1, y1, x2, y2 = self.transform_coords(mapper)
 			# Transform position on circne to position on rectangle
-			x = x / float(STICK_PAD_MAX)
-			y = y / float(STICK_PAD_MAX)
+			x = old_div(x, float(STICK_PAD_MAX))
+			y = old_div(y, float(STICK_PAD_MAX))
 			x, y = circle_to_square(x, y)
 			# Perform magic
 			x = max(0, (x + 1.0) * 0.5)
@@ -1249,9 +1255,9 @@ class GyroAbsAction(HapticEnabledAction, GyroAction):
 	GYROAXES = (0, 1, 2)
 	def gyro(self, mapper, pitch, yaw, roll, q1, q2, q3, q4):
 		if mapper.get_controller().flags & ControllerFlags.EUREL_GYROS:
-			pyr = [q1 / 10430.37, q2 / 10430.37, q3 / 10430.37]	# 2**15 / PI
+			pyr = [old_div(q1, 10430.37), old_div(q2, 10430.37), old_div(q3, 10430.37)]	# 2**15 / PI
 		else:
-			pyr = list(quat2euler(q1 / 32768.0, q2 / 32768.0, q3 / 32768.0, q4 / 32768.0))
+			pyr = list(quat2euler(old_div(q1, 32768.0), old_div(q2, 32768.0), old_div(q3, 32768.0), old_div(q4, 32768.0)))
 		for i in self.GYROAXES:
 			self.ir[i] = self.ir[i] or pyr[i]
 			pyr[i] = anglediff(self.ir[i], pyr[i]) * (2**15) * self.speed[2] * 2 / PI
@@ -1373,7 +1379,7 @@ class TiltAction(MultichildAction):
 	
 	def gyro(self, mapper, *pyr):
 		q1, q2, q3, q4 = pyr[-4:]
-		pyr = quat2euler(q1 / 32768.0, q2 / 32768.0, q3 / 32768.0, q4 / 32768.0)
+		pyr = quat2euler(old_div(q1, 32768.0), old_div(q2, 32768.0), old_div(q3, 32768.0), old_div(q4, 32768.0))
 		for j in (0, 1, 2):
 			i = j * 2
 			if self.actions[i]:
@@ -1388,7 +1394,7 @@ class TiltAction(MultichildAction):
 					self.actions[i].button_release(mapper)
 					self.states[i] = False
 			if self.actions[i+1]:
-				if pyr[j] > TiltAction.MIN / self.speed[j]:
+				if pyr[j] > old_div(TiltAction.MIN, self.speed[j]):
 					# Side faces up
 					if not self.states[i+1]:
 						self.actions[i+1].button_press(mapper)
@@ -1419,7 +1425,7 @@ class TrackballAction(Action):
 	COMMAND = "trackball"
 	
 	def __new__(cls, speed=None):
-		from modifiers import BallModifier
+		from .modifiers import BallModifier
 		return BallModifier(MouseAction(speed=speed))
 
 
@@ -1911,8 +1917,8 @@ class DPadAction(MultichildAction, HapticEnabledAction):
 		# Generate mapping of angle range -> index
 		self.ranges = []
 		normal_range = 90 - self.diagonal_rage
-		i = 360-normal_range / 2
-		for x in xrange(0, 9):
+		i = 360-old_div(normal_range, 2)
+		for x in range(0, 9):
 			r = normal_range if x % 2 == 0 else self.diagonal_rage
 			i, j = (i + r) % 360, i
 			self.ranges.append(( j, i, x % 8 ))
@@ -2122,7 +2128,7 @@ class RingAction(MultichildAction):
 				distance /= self.radius
 			else:
 				action = self.outer
-				distance = (distance - self._radius_m) / (1.0 - self.radius)
+				distance = old_div((distance - self._radius_m), (1.0 - self.radius))
 			x = distance * sin(angle)
 			y = distance * cos(angle)
 			
@@ -2474,7 +2480,7 @@ class NoAction(Action):
 		return cls._singleton
 	
 	
-	def __nonzero__(self):
+	def __bool__(self):
 		return False
 	
 	
