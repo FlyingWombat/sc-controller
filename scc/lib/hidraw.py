@@ -97,7 +97,7 @@ class HIDRaw(object):
         """
         name = ctypes.create_string_buffer(length)
         self._ioctl(_HIDIOCGRAWNAME(length), name, True)
-        return name.value.decode('UTF-8')
+        return name.value
 
     def getPhysicalAddress(self, length=512):
         """

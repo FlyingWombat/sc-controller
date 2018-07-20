@@ -45,7 +45,7 @@ class Dialog(Editor, ComboSetter, Export, ImportVdf, ImportSccprofile):
 			log.error(traceback.format_exc())
 			return None
 		try:
-			if f.decode("utf-8").strip(" \t\r\n").startswith("{"):
+			if f.strip(" \t\r\n").startswith("{"):
 				# Looks like json
 				data = json.loads(open(filename, "r").read())
 				if "buttons" in data and "gyro" in data:

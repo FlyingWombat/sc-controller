@@ -1285,7 +1285,7 @@ class USBDeviceHandle(object):
         except USBErrorNotFound:
             # pylint: enable=undefined-variable
             return None
-        return descriptor_string.value.decode('UTF-16-LE')
+        return descriptor_string.value
 
     def getRawDescriptor(self, descriptor, desc_index, length):
         """
@@ -1322,7 +1322,7 @@ class USBDeviceHandle(object):
         except USBErrorNotFound:
             # pylint: enable=undefined-variable
             return None
-        return descriptor_string.value.decode('ASCII')
+        return descriptor_string.value
 
     # Sync I/O
 

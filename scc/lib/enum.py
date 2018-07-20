@@ -471,7 +471,7 @@ class EnumMeta(type):
             # if class_name is unicode, attempt a conversion to ASCII
             if isinstance(class_name, str):
                 try:
-                    class_name = class_name.encode('ascii')
+                    class_name = class_name
                 except UnicodeEncodeError:
                     raise TypeError('%r is not representable in ASCII' % class_name)
         metacls = cls.__class__

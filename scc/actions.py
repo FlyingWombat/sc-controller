@@ -361,7 +361,7 @@ class Action(object):
 		cetera until first non-default parameter is reached.
 		
 		if as_strings is set to True, all parameters are converted to apropriate
-		strings (x.name for enums, x.encode('string_escape') for strings, 
+		strings (x.name for enums, x for strings, 
 		"""
 		argspec = inspect.getargspec(self.__class__.__init__)
 		required_count = len(argspec.args) - len(argspec.defaults) - 1
@@ -378,7 +378,7 @@ class Action(object):
 		Returns list with parameters encoded to strings in following way:
 		- x.name for enums
 		- str(x) numbers
-		- '%s' % (x.encode('string_escape'),) for strings
+		- '%s' % (x,) for strings
 		"""
 		return [ Action._encode_parameter(p) for p in parameters ]
 	
@@ -389,7 +389,7 @@ class Action(object):
 		if parameter in PARSER_CONSTANTS:
 			return parameter
 		if type(parameter) in (str, str):
-			return "'%s'" % (str(parameter).encode('string_escape'),)
+			return "'%s'" % (str(parameter),)
 		return nameof(parameter)
 	
 	

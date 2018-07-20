@@ -157,8 +157,8 @@ class AutoSwitcher(object):
 					try:
 						if self.config['autoswitch_osd']:
 							msg = (_("Switched to profile") + " " + profile_name)
-							self.socket.send("OSD: " + msg.encode('utf-8') + "\n")
-						self.socket.send("Profile: " + path.encode('utf-8') + "\n")
+							self.socket.send("OSD: " + msg + "\n")
+						self.socket.send("Profile: " + path + "\n")
 					except:
 						log.error("Socket write failed")
 						os._exit(2)

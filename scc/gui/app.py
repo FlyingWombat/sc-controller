@@ -452,7 +452,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 			if a.name:
 				a = NameModifier(a.name, a)
 			clp = Gtk.Clipboard.get_default(Gdk.Display.get_default())
-			clp.set_text(a.to_string().encode('utf-8'), -1)
+			clp.set_text(a.to_string(), -1)
 			clp.store()
 	
 	
@@ -465,7 +465,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 		clp = Gtk.Clipboard.get_default(Gdk.Display.get_default())
 		text = clp.wait_for_text()
 		if text:
-			a = GuiActionParser().restart(text.decode('utf-8')).parse()
+			a = GuiActionParser().restart(text).parse()
 			if not isinstance(a, InvalidAction):
 				self.on_action_chosen(self.context_menu_for, a)
 	
@@ -539,7 +539,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 			self.current.clear()
 		else:
 			self.current.is_template = False
-		self.new_profile(self.current, txNewProfile.get_text().decode("utf-8"))
+		self.new_profile(self.current, txNewProfile.get_text())
 		dlg.hide()
 	
 	
@@ -1172,7 +1172,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 	
 	
 	def on_txRename_changed(self, tx):
-		name = tx.get_text().decode("utf-8")
+		name = tx.get_text()
 		btRenameProfile = self.builder.get_object("btRenameProfile")
 		btRenameProfile.set_sensitive(find_profile(name) is None)
 	
@@ -1181,7 +1181,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 		dlg = self.builder.get_object("dlgRenameProfile")
 		txRename = self.builder.get_object("txRename")
 		old_name = dlg._name
-		new_name = txRename.get_text().decode("utf-8")
+		new_name = txRename.get_text()
 		old_fname = os.path.join(get_profiles_path(), old_name + ".sccprofile")
 		new_fname = os.path.join(get_profiles_path(), new_name + ".sccprofile")
 		try:
@@ -1491,7 +1491,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 					buffer += bytes.get_data()
 					stream.read_bytes_async(102400, 0, None, stream_ready, buffer)
 				else:
-					self.on_got_release_notes(buffer.decode("utf-8"))
+					self.on_got_release_notes(buffer)
 			except Exception as e:
 				log.warning("Failed to read release notes")
 				log.exception(e)
@@ -1594,7 +1594,7 @@ class App(Gtk.Application, UserDataManager, BindingEditor):
 					# Failed. Just do nothing
 					return
 			if giofile.get_path():
-				path = giofile.get_path().decode("utf-8")
+				path = giofile.get_path()
 				filetype = Dialog.determine_type(path)
 				if filetype:
 					log.info("Importing '%s'..." % (filetype))

@@ -385,7 +385,7 @@ def get_window_title(dpy, window):
 		trash, prop = get_window_prop(dpy, window, prop_name, max_size=2048)
 		if prop:
 			try:
-				value = cast(prop, c_char_p).value.decode('utf-8')
+				value = cast(prop, c_char_p).value
 				free(prop)
 				return value
 			except: pass
@@ -400,7 +400,7 @@ def get_window_class(dpy, window):
 	s = alloc_class_hint()
 	if s:
 		if get_class_hint(dpy, window, s):
-			value = s.contents.res_name.decode('utf-8'), s.contents.res_class.decode('utf-8')
+			value = s.contents.res_name, s.contents.res_class
 			free(s)
 			return value
 		free(s)

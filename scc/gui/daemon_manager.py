@@ -164,7 +164,7 @@ class DaemonManager(GObject.GObject):
 			# Broken sonnection, daemon was probbaly terminated
 			self._on_daemon_died()
 			return
-		data = response.get_data().decode("utf-8")
+		data = response.get_data()
 		if len(data) == 0:
 			# Connection terminated
 			self._on_daemon_died()
@@ -254,7 +254,7 @@ class DaemonManager(GObject.GObject):
 		if self.alive and self.connection is not None:
 			self._requests.append(( success_cb, error_cb ))
 			(self.connection.get_output_stream()
-				.write_all(message.encode('utf-8') + '\n', None))
+				.write_all(message + '\n', None))
 		else:
 			# Instant failure
 			error_cb("Not connected.")

@@ -53,7 +53,7 @@ class ChangeProfileAction(Action, SpecialAction):
 	
 	def to_string(self, multiline=False, pad=0):
 		return (" " * pad) + "%s('%s')" % (self.COMMAND,
-				self.profile.encode('utf-8').encode('string_escape'))
+				self.profile)
 	
 	
 	def button_release(self, mapper):
@@ -72,7 +72,7 @@ class ShellCommandAction(Action, SpecialAction):
 	
 	def __init__(self, command):
 		if type(command) == str:
-			command = command.decode("unicode_escape")
+			command = command
 		assert type(command) == str
 		Action.__init__(self, command)
 		self.command = command
@@ -88,7 +88,7 @@ class ShellCommandAction(Action, SpecialAction):
 	
 	
 	def to_string(self, multiline=False, pad=0):
-		return (" " * pad) + "%s('%s')" % (self.COMMAND, self.parameters[0].encode('unicode_escape'))
+		return (" " * pad) + "%s('%s')" % (self.COMMAND, self.parameters[0])
 	
 	
 	def button_press(self, mapper):
@@ -225,7 +225,7 @@ class OSDAction(Action, SpecialAction):
 		if isinstance(self.parameters[0], Action):
 			p0str = self.parameters[0].to_string(multiline=multiline, pad=pad)
 		else:
-			p0str = "'%s'" % (str(self.parameters[0]).encode('string_escape'),)
+			p0str = "'%s'" % (str(self.parameters[0]),)
 		if len(self.parameters) == 1:
 			return (" " * pad) + "%s(%s)" % (self.COMMAND, p0str)
 		else:
@@ -519,7 +519,7 @@ class DialogAction(Action, SpecialAction):
 			rv += "%s, " % (nameof(self.confirm_with),)
 			if self.cancel_with != DEFAULT:
 				rv += "%s, " % (nameof(self.cancel_with),)
-		rv += "'%s', " % (self.text.encode('string_escape'),)
+		rv += "'%s', " % (self.text,)
 		if multiline:
 			rv += "\n%s" % (" " * (pad + 2))
 		for option in self.options:

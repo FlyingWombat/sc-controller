@@ -62,7 +62,7 @@ class SpecialActionComponent(AEComponent, MenuActionCofC):
 			elif isinstance(action, ShellCommandAction):
 				self.set_cb(cb, "shell")
 				enCommand = self.builder.get_object("enCommand")
-				enCommand.set_text(action.command.encode("utf-8"))
+				enCommand.set_text(action.command)
 			elif isinstance(action, ResetGyroAction):
 				self.set_cb(cb, "resetgyro")
 			elif isinstance(action, ChangeProfileAction):
@@ -171,13 +171,13 @@ class SpecialActionComponent(AEComponent, MenuActionCofC):
 	def on_enCommand_changed(self, *a):
 		if self._recursing : return
 		enCommand = self.builder.get_object("enCommand")
-		self.editor.set_action(ShellCommandAction(enCommand.get_text().decode("utf-8")))
+		self.editor.set_action(ShellCommandAction(enCommand.get_text()))
 	
 	
 	def on_enOSDText_changed(self, *a):
 		if self._recursing : return
 		enOSDText = self.builder.get_object("enOSDText")
-		self.editor.set_action(OSDAction(enOSDText.get_text().decode("utf-8")))
+		self.editor.set_action(OSDAction(enOSDText.get_text()))
 	
 	
 	def on_exMenuControl_activate(self, ex, *a):
