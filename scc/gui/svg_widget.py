@@ -202,7 +202,8 @@ class SVGWidget(Gtk.EventBox):
 			# 200 images by hand;
 			if len(buttons) == 0:
 				# Quick way out - changes are not needed
-				svg = Rsvg.Handle.new_from_data(self.current_svg)
+				# note: gi.repository.Rsvg throws a type error if not passed a byte-string
+				svg = Rsvg.Handle.new_from_data(self.current_svg.encode('utf-8'))
 			else:
 				# 1st, parse source as XML
 				tree = ET.fromstring(self.current_svg)
