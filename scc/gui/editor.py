@@ -65,7 +65,8 @@ class Editor(ComboSetter):
 	def install_error_css():
 		if Editor._error_css_provider is None:
 			Editor._error_css_provider = Gtk.CssProvider()
-			Editor._error_css_provider.load_from_data(str(Editor.ERROR_CSS))
+			# note: GTK seems to require a byte-string
+			Editor._error_css_provider.load_from_data(Editor.ERROR_CSS.encode('utf-8'))
 			Gtk.StyleContext.add_provider_for_screen(
 					Gdk.Screen.get_default(),
 					Editor._error_css_provider,

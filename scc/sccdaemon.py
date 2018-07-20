@@ -41,9 +41,9 @@ class ThreadingUnixStreamServer(ThreadingMixIn, UnixStreamServer): daemon_thread
 
 class SCCDaemon(Daemon):
 	
-	def __init__(self, piddile, socket_file):
+	def __init__(self, pidfile, socket_file):
 		set_logging_level(True, True)
-		Daemon.__init__(self, piddile)
+		Daemon.__init__(self, pidfile)
 		Config()					# Generates ~/.config/scc and default config if needed
 		self.started = False
 		self.exiting = False
