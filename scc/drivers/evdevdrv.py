@@ -88,7 +88,7 @@ class EvdevController(Controller):
 		self._dpad_map = {}
 		self._calibrations = {}
 		
-		for x, value in config.get("buttons", {}).items():
+		for x, value in list(config.get("buttons", {}).items()):
 			try:
 				keycode = int(x)
 				if value in TRIGGERS:
@@ -97,12 +97,12 @@ class EvdevController(Controller):
 					sc = getattr(SCButtons, value)
 					self._button_map[keycode] = sc
 			except: pass
-		for x, value in config.get("axes", {}).items():
+		for x, value in list(config.get("axes", {}).items()):
 			code, axis = int(x), value.get("axis")
 			if axis in EvdevControllerInput._fields:
 				self._calibrations[code] = parse_axis(value)
 				self._axis_map[code] = axis
-		for x, value in config.get("dpads", {}).items():
+		for x, value in list(config.get("dpads", {}).items()):
 			code, axis = int(x), value.get("axis")
 			if axis in EvdevControllerInput._fields:
 				self._calibrations[code] = parse_axis(value)

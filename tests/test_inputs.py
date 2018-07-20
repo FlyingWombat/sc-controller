@@ -128,7 +128,7 @@ class TestInputs(object):
 		
 		# Create movement over left pad
 		state = ZERO_STATE
-		for x in reversed(range(STICK_PAD_MIN * 2 / 3, -10, 1000)):
+		for x in reversed(list(range(STICK_PAD_MIN * 2 / 3, -10, 1000))):
 			new_state = state._replace(buttons=SCButtons.LPADTOUCH, lpad_x=x)
 			mapper.input(mapper.controller, state, new_state)
 			state = new_state

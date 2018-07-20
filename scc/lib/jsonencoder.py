@@ -371,7 +371,7 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
 		if _sort_keys:
 			items = sorted(list(dct.items()), key=lambda kv: kv[0])
 		else:
-			items = iter(dct.items())
+			items = iter(list(dct.items()))
 		for key, value in items:
 			if isinstance(key, basestring):
 				pass
