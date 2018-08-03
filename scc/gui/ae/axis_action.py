@@ -522,12 +522,13 @@ class FakeMapper(object):
 		"""
 		root = X.get_default_root_window(self._xdisplay)
 		NET_WM_WINDOW_TYPE_NORMAL = X.intern_atom(self._xdisplay,
-				"_NET_WM_WINDOW_TYPE_NORMAL" , False)
+				b"_NET_WM_WINDOW_TYPE_NORMAL" , False)
 		my_windows = [ x.get_xid() for x
 				in Gdk.Screen.get_default().get_toplevel_windows() ]
 		nitems, prop = X.get_window_prop(self._xdisplay,
-				root, "_NET_CLIENT_LIST_STACKING", max_size=0x8000)
+				root, b"_NET_CLIENT_LIST_STACKING", max_size=0x8000)
 		
+		# note: members of X seems to need byte-strings for arguments
 		if nitems > 0:
 			for i in reversed(list(range(0, nitems))):
 				window = cast(prop, POINTER(X.XID))[i]
@@ -538,7 +539,7 @@ class FakeMapper(object):
 					# skip minimized and invisible windows
 					continue
 				tp = X.get_window_prop(self._xdisplay, window,
-						"_NET_WM_WINDOW_TYPE")[-1]
+						b"_NET_WM_WINDOW_TYPE")[-1]
 				if tp is not None:
 					tpval = cast(tp, POINTER(X.Atom)).contents.value
 					X.free(tp)
