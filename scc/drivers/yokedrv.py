@@ -4,7 +4,10 @@ SC Controller - Yoke driver
 
 Works with Yoke android application
 """
+from __future__ import division
 
+from builtins import object
+from past.utils import old_div
 from zeroconf import InterfaceChoice, ServiceInfo, Zeroconf
 from scc.constants import ControllerFlags
 from scc.controller import Controller
@@ -47,8 +50,8 @@ class YokeController(Controller):
 		v = message.split()[1:]  # first value is useless at the moment
 		v = [float(m) for m in v]
 		v = (
-			(v[0]/9.81 - 0)    * 1.5 / 2 + 0.5,
-			(v[1]/9.81 - 0.52) * 3.0 / 2 + 0.5,
+			(old_div(v[0],9.81) - 0)    * 1.5 / 2 + 0.5,
+			(old_div(v[1],9.81) - 0.52) * 3.0 / 2 + 0.5,
 			int(v[2] * 32767),
 			int(v[3] * -32767),
 			int(v[4] * 32767),
@@ -74,7 +77,7 @@ class YokeController(Controller):
 		self.mapper.input(self, old_state, idata)
 
 
-class YokeDrv:
+class YokeDrv(object):
 	def __init__(self, daemon):
 		self.daemon = daemon
 		self.controller = None
@@ -124,7 +127,7 @@ class YokeDrv:
 				self.controller = YokeController(self, address)
 				self.daemon.add_controller(self.controller)
 			self.controller.input(m)
-		except Exception, e:
+		except Exception as e:
 			log.exception(e)
 	
 	def on_timeout(self, controller):

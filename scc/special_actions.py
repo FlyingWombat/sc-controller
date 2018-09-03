@@ -11,6 +11,7 @@ action only prints warning to console.
 from __future__ import unicode_literals
 from __future__ import division
 
+from builtins import next
 from builtins import str
 from builtins import range
 from past.utils import old_div
@@ -710,7 +711,7 @@ class GesturesAction(Action, OSDEnabledAction, SpecialAction):
 	def _find_best_match_gesture(self, gesture_string):
 		NUM_MATCHES_TO_RETURN = 1
 	
-		similar_gestures = get_close_matches(gesture_string, self.gestures.keys(), NUM_MATCHES_TO_RETURN, self.precision)
+		similar_gestures = get_close_matches(gesture_string, list(self.gestures.keys()), NUM_MATCHES_TO_RETURN, self.precision)
 		best_gesture = next(iter(similar_gestures), None)
 
 		if best_gesture is not None:

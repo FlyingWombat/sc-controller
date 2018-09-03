@@ -503,7 +503,7 @@ class SVGEditor(object):
 	def matrixmul(X, Y, *a):
 		if len(a) > 0:
 			return SVGEditor.matrixmul(SVGEditor.matrixmul(X, Y), a[0], *a[1:])
-		return [[ sum(a*b for a,b in zip(x,y)) for y in zip(*Y) ] for x in X ]
+		return [[ sum(a*b for a,b in list(zip(x,y))) for y in zip(*Y) ] for x in X ]
 	
 	
 	@staticmethod
