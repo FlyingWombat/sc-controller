@@ -24,10 +24,12 @@ print("lib.linux-{0}-{1}.{2}".format(platform.machine(), py_version[0], py_versi
 	
 	python3 setup.py build || exit 1
 	echo ""
-	
+
+	# Cython likes to append system arch and version to generated objects, for python reasons.
+	ext_suffix=$( python3 -c "from sysconfig import get_config_var; print(get_config_var('EXT_SUFFIX'))")
 	for cmod in ${C_MODULES[@]}; do
 		if [ ! -e lib${cmod}.so ] ; then
-			ln -s lib${cmod}.cpython-36m-x86_64-linux-gnu.so build/$LIB/lib${cmod}.so || exit 1 # TODO don't know why the output name changed
+			ln -s lib${cmod}${ext_suffix} build/$LIB/lib${cmod}.so || exit 1 # TODO don't know why the output name changed
 			ln -s build/$LIB/lib${cmod}.so ./lib${cmod}.so || exit 1
 			echo Symlinked ./lib${cmod}.so '->' build/$LIB/lib${cmod}.so
 		fi
