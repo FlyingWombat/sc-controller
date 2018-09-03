@@ -250,6 +250,9 @@ class Monitor(object):
 			# Already done
 			return self
 		fn = getattr(self._eudev._lib, "udev_monitor_filter_add_" + whichone)
+		
+		# ctypes is complaining about recieving strings instead of bytes
+		pars = [ b'' if p is None else p.encode('utf-8') for p in pars ]
 		pars = [ ctypes.c_char_p(p) for p in pars ]
 		self._keep_in_mem += pars
 		err = fn(self._monitor, *pars)

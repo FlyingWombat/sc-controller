@@ -29,11 +29,11 @@ class SVGWidget(Gtk.EventBox):
 	
 	__gsignals__ = {
 			# Raised when mouse is over defined area
-			b"hover"	: (GObject.SignalFlags.RUN_FIRST, None, (object,)),
+			"hover"	: (GObject.SignalFlags.RUN_FIRST, None, (object,)),
 			# Raised when mouse leaves all defined areas
-			b"leave"	: (GObject.SignalFlags.RUN_FIRST, None, ()),
+			"leave"	: (GObject.SignalFlags.RUN_FIRST, None, ()),
 			# Raised user clicks on defined area
-			b"click"	: (GObject.SignalFlags.RUN_FIRST, None, (object,)),
+			"click"	: (GObject.SignalFlags.RUN_FIRST, None, (object,)),
 	}
 	
 	
@@ -58,7 +58,7 @@ class SVGWidget(Gtk.EventBox):
 	
 	
 	def set_image(self, filename):
-		self.current_svg = open(filename, "r").read().decode("utf-8")
+		self.current_svg = open(filename, "r").read()
 		self.cache = OrderedDict()
 		self.areas = []
 		self.parse_image()
@@ -217,7 +217,7 @@ class SVGWidget(Gtk.EventBox):
 				xml = ET.tostring(tree)
 				
 				# ... and now, parse that as XML again......
-				svg = Rsvg.Handle.new_from_data(xml.encode("utf-8"))
+				svg = Rsvg.Handle.new_from_data(xml)
 			while len(self.cache) >= self.CACHE_SIZE:
 				self.cache.popitem(False)
 			if self.size_override:
