@@ -60,15 +60,15 @@ class DaemonManager(GObject.GObject):
 	"""
 	
 	__gsignals__ = {
-			"alive"					: (GObject.SignalFlags.RUN_FIRST, None, ()),
-			"controller-count-changed"	: (GObject.SignalFlags.RUN_FIRST, None, (int,)),
-			"dead"						: (GObject.SignalFlags.RUN_FIRST, None, ()),
-			"error"					: (GObject.SignalFlags.RUN_FIRST, None, (object,)),
-			"event"					: (GObject.SignalFlags.RUN_FIRST, None, (object,object,object)),
-			"profile-changed"			: (GObject.SignalFlags.RUN_FIRST, None, (object,)),
-			"reconfigured"				: (GObject.SignalFlags.RUN_FIRST, None, ()),
-			"unknown-msg"				: (GObject.SignalFlags.RUN_FIRST, None, (object,)),
-			"version"					: (GObject.SignalFlags.RUN_FIRST, None, (object,)),
+			b"alive"					: (GObject.SignalFlags.RUN_FIRST, None, ()),
+			b"controller-count-changed"	: (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+			b"dead"						: (GObject.SignalFlags.RUN_FIRST, None, ()),
+			b"error"					: (GObject.SignalFlags.RUN_FIRST, None, (object,)),
+			b"event"					: (GObject.SignalFlags.RUN_FIRST, None, (object,object,object)),
+			b"profile-changed"			: (GObject.SignalFlags.RUN_FIRST, None, (object,)),
+			b"reconfigured"				: (GObject.SignalFlags.RUN_FIRST, None, ()),
+			b"unknown-msg"				: (GObject.SignalFlags.RUN_FIRST, None, (object,)),
+			b"version"					: (GObject.SignalFlags.RUN_FIRST, None, (object,)),
 	}
 	
 	RECONNECT_INTERVAL = 5
@@ -254,7 +254,7 @@ class DaemonManager(GObject.GObject):
 		if self.alive and self.connection is not None:
 			self._requests.append(( success_cb, error_cb ))
 			(self.connection.get_output_stream()
-				.write_all(message + '\n', None))
+				.write_all(message.encode('utf-8') + b'\n', None))
 		else:
 			# Instant failure
 			error_cb("Not connected.")
@@ -336,9 +336,9 @@ class ControllerManager(GObject.GObject):
 	"""
 	
 	__gsignals__ = {
-			"event"			: (GObject.SignalFlags.RUN_FIRST, None, (object,object)),
-			"lost"				: (GObject.SignalFlags.RUN_FIRST, None, ()),
-			"profile-changed"	: (GObject.SignalFlags.RUN_FIRST, None, (object,)),
+			b"event"			: (GObject.SignalFlags.RUN_FIRST, None, (object,object)),
+			b"lost"				: (GObject.SignalFlags.RUN_FIRST, None, ()),
+			b"profile-changed"	: (GObject.SignalFlags.RUN_FIRST, None, (object,)),
 	}
 	
 	DEFAULT_ICONS = [ "A", "B", "X", "Y", "BACK", "C", "START",

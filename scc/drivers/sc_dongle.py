@@ -51,7 +51,7 @@ INPUT_FORMAT = [
 FORMATS, NAMES = list(zip(*INPUT_FORMAT))
 TUP_FORMAT = '<' + ''.join(FORMATS)
 ControllerInput = namedtuple('ControllerInput', ' '.join([ x for x in NAMES if not x.startswith('ukn_') ]))
-SCI_NULL = ControllerInput._make(struct.unpack('<' + ''.join(FORMATS), '\x00' * 64))
+SCI_NULL = ControllerInput._make(struct.unpack('<' + ''.join(FORMATS), b'\x00' * 64))
 
 
 log = logging.getLogger("SCDongle")
@@ -319,8 +319,8 @@ class SCController(Controller):
 		if enable_gyros is not None : self._enable_gyros = enable_gyros
 		if led_level is not None: self._led_level = led_level
 		
-		unknown1 = '\x18\x00\x00\x31\x02\x00\x08\x07\x00\x07\x07\x00\x30'
-		unknown2 = '\x00\x2e'
+		unknown1 = b'\x18\x00\x00\x31\x02\x00\x08\x07\x00\x07\x07\x00\x30'
+		unknown2 = b'\x00\x2e'
 		timeout1 = self._idle_timeout & 0x00FF
 		timeout2 = (self._idle_timeout & 0xFF00) >> 8
 		
