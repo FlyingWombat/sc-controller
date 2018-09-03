@@ -250,7 +250,7 @@ class SCCDaemon(Daemon):
 	
 	def on_sa_shell(self, mapper, action):
 		""" Called when 'shell' action is used """
-		os.system((action.command + " &"))
+		os.system((action.command + " &").encode('utf-8'))
 	
 	
 	def on_sa_gestures(self, mapper, action, x, y, what):
@@ -561,7 +561,7 @@ class SCCDaemon(Daemon):
 		"""
 		with self.lock:
 			self.errors.append(( id, error ))
-			self._send_to_all(("Error: %s\n" % (error,)))
+			self._send_to_all(("Error: %s\n" % (error,)).encode("utf-8"))
 	
 	
 	def remove_error(self, id):
@@ -585,8 +585,8 @@ class SCCDaemon(Daemon):
 		for c in self.controllers:
 			method(("Controller: %s %s %s %s\n" % (
 				c.get_id(), c.get_type(), c.flags, c.get_gui_config_file()
-			)))
-		method(("Controller Count: %s\n" % (len(self.controllers),)))
+			)).encode("utf-8"))
+		method(("Controller Count: %s\n" % (len(self.controllers),)).encode("utf-8"))
 	
 	
 	def send_profile_info(self, controller, method, mapper=None):
@@ -599,11 +599,11 @@ class SCCDaemon(Daemon):
 			method(("Controller profile: %s %s\n" % (
 				controller.get_id(),
 				mapper.profile.get_filename()
-			)))
+			)).encode("utf-8"))
 		if mapper == self.default_mapper:
 			method(("Current profile: %s\n" % (
 				mapper.profile.get_filename(),
-			)))
+			)).encode("utf-8"))
 			return True
 		return False
 	
@@ -695,15 +695,15 @@ class SCCDaemon(Daemon):
 			client = Client(connection, self.default_mapper, rfile, wfile)
 			self.clients.add(client)
 			wfile.write(b"SCCDaemon\n")
-			wfile.write(("Version: %s\n" % (DAEMON_VERSION,)))
-			wfile.write(("PID: %s\n" % (os.getpid(),)))
+			wfile.write(("Version: %s\n" % (DAEMON_VERSION,)).encode("utf-8"))
+			wfile.write(("PID: %s\n" % (os.getpid(),)).encode("utf-8"))
 			self.send_controller_list(wfile.write)
 			self.send_all_profiles(wfile.write)
 			if len(self.errors) == 0:
 				wfile.write(b"Ready.\n")
 			else:
 				for id, error in self.errors:
-					wfile.write(("Error: %s\n" % (error,)))
+					wfile.write(("Error: %s\n" % (error,)).encode("utf-8"))
 		
 		while True:
 			try:
@@ -733,21 +733,21 @@ class SCCDaemon(Daemon):
 		if message.startswith("Profile:"):
 			with self.lock:
 				try:
-					filename = message[8:].strip("\t ")
+					filename = message[8:].decode("utf-8").strip("\t ")
 					self._set_profile(client.mapper, filename)
 					log.info("Loaded profile '%s'", filename)
 					client.wfile.write(b"OK.\n")
 				except Exception as e:
 					exc = traceback.format_exc()
 					log.exception(e)
-					tb = str(exc)
+					tb = str(exc).encode("utf-8").encode('string_escape')
 					client.wfile.write(b"Fail: " + tb + b"\n")
 		elif message.startswith("OSD:"):
 			if not self.osd_daemon:
 				client.wfile.write(b"Fail: Cannot show OSD; there is no scc-osd-daemon registered\n")
 			else:
 				try:
-					text = message[5:].strip("\t ")
+					text = message[5:].decode("utf-8").strip("\t ")
 					with self.lock:
 						if not self._osd("message", text):
 							raise Exception()
@@ -814,7 +814,7 @@ class SCCDaemon(Daemon):
 				l, actionstr = message.split(":", 1)[1].strip(" \t\r").split(" ", 1)
 				action = TalkingActionParser().restart(actionstr).parse().compress()
 			except Exception as e:
-				e = str(e)
+				e = str(e).encode("utf-8").encode('string_escape')
 				client.wfile.write(b"Fail: failed to parse: " + e + "\n")
 				return
 			with self.lock:
@@ -823,7 +823,7 @@ class SCCDaemon(Daemon):
 						client.wfile.write(b"Fail: Cannot lock " + l.encode("utf-8") + b"\n")
 						return
 				except ValueError as e:
-					tb = str(traceback.format_exc())
+					tb = str(traceback.format_exc()).encode("utf-8").encode('string_escape')
 					client.wfile.write(b"Fail: " + tb + b"\n")
 					return
 				client.replace_action(self, SCCDaemon.source_to_constant(l), action)
@@ -837,7 +837,7 @@ class SCCDaemon(Daemon):
 							client.wfile.write(b"Fail: Cannot lock " + l.encode("utf-8") + b"\n")
 							return
 				except ValueError as e:
-					tb = str(traceback.format_exc())
+					tb = str(traceback.format_exc()).encode("utf-8").encode('string_escape')
 					client.wfile.write(b"Fail: " + tb + b"\n")
 					return
 				for l in to_lock:
@@ -865,7 +865,7 @@ class SCCDaemon(Daemon):
 				# Respond
 				try:
 					client.wfile.write(b"OK.\n")
-					self._send_to_all("Reconfigured.\n")
+					self._send_to_all("Reconfigured.\n".encode("utf-8"))
 				except:
 					pass
 		elif message.startswith("Rescan."):
@@ -904,7 +904,7 @@ class SCCDaemon(Daemon):
 				what, up_angle = message[8:].strip().split(" ", 2)
 				up_angle = int(up_angle)
 			except Exception as e:
-				tb = str(traceback.format_exc())
+				tb = str(traceback.format_exc()).encode("utf-8").encode('string_escape')
 				client.wfile.write(b"Fail: " + tb + b"\n")
 				return
 			with self.lock:
@@ -1205,7 +1205,7 @@ class ReportingAction(Action):
 	
 	def _report(self, message):
 		try:
-			self.client.wfile.write(message)
+			self.client.wfile.write(message.encode("utf-8"))
 		except Exception as e:
 			# May fail when client dies
 			self.client.rfile.close()

@@ -74,7 +74,7 @@ class KeyboardImage(Gtk.DrawingArea):
 		self.color_text = 1, 1, 1, 1
 		
 		self.overlay = SVGWidget(image, False)
-		self.tree = ET.fromstring(self.overlay.current_svg)
+		self.tree = ET.fromstring(self.overlay.current_svg.encode("utf-8"))
 		SVGWidget.find_areas(self.tree, None, areas, get_colors=True)
 		
 		self._hilight = ()
@@ -99,7 +99,7 @@ class KeyboardImage(Gtk.DrawingArea):
 		self.set_size_request(*SVGEditor.get_size(background))
 		self.overlay.edit().keep("overlay").commit()
 		self.overlay.hilight({})
-		# open("/tmp/a.svg", "w").write(self.overlay.current_svg)
+		# open("/tmp/a.svg", "w").write(self.overlay.current_svg.encode("utf-8"))
 	
 	
 	def hilight(self, hilight, pressed):
@@ -119,7 +119,7 @@ class KeyboardImage(Gtk.DrawingArea):
 			if type(label) in (int, int):
 				pass
 			elif label:
-				b.label = label
+				b.label = label.encode("utf-8")
 		self.queue_draw()
 	
 	
